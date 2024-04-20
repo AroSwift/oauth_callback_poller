@@ -1,7 +1,7 @@
 from flask import Flask, request
 import os
 
-PORT = 5022
+PORT = 3000
 app = Flask(__name__)
 codes = {}
 
