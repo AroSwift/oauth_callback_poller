@@ -31,8 +31,8 @@ def oauth_callback(methods=['POST']):
 def get_code(state):
     code = codes.get(state)
     if code:
-        return jsonpickle.encode({ 'code': code })
-    return jsonpickle.encode({ 'error': 'Code not found' })
+        return jsonpickle.encode({ 'code': code }), 404
+    return jsonpickle.encode({ 'error': 'Code not found' }), 200
 
 if __name__ == '__main__':
     if DEVELOPMENT:
