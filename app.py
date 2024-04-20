@@ -7,7 +7,7 @@ PORT = 3000
 DEBUG = False
 DEVELOPMENT = False
 app = Flask(__name__)
-codes = {}
+data_holder = {}
 
 @app.route('/startup', methods=['GET'])
 def startup():
@@ -19,22 +19,22 @@ def oauth_callback(methods=['POST']):
     code = request.args.get('code')
     state = request.args.get('state')
     access_token = request.args.get('access_token')
-    codes[state]['code'] = code if code else None
-    codes[state]['access_token'] = access_token if access_token else None
+    data_holder[state]['code'] = code if code else None
+    data_holder[state]['access_token'] = access_token if access_token else None
     return jsonpickle.encode({ 'status': 'good' })
 
-@app.route('/get_access_token/<state>', methods=['GET'])
-def get_code(raw_state):
-    state = codes.get(raw_state)
-    if state:
-        return jsonpickle.encode({ 'access_token': state['access_token'] }), 404
+@app.route('/get_code/<state>', methods=['GET'])
+def get_code(state):
+    data = data_holder.get(state)
+    if data:
+        return jsonpickle.encode({ 'code': data['code'] }), 404
     return jsonpickle.encode({ 'error': 'Code not found' }), 200
 
-@app.route('/get_code/<state>', methods=['GET'])
-def get_code(raw_state):
-    state = codes.get(raw_state)
-    if state:
-        return jsonpickle.encode({ 'code': state['code'] }), 404
+@app.route('/get_access_token/<state>', methods=['GET'])
+def get_access_token(state):
+    data = data_holder.get(state)
+    if data:
+        return jsonpickle.encode({ 'access_token': data['access_token'] }), 404
     return jsonpickle.encode({ 'error': 'Code not found' }), 200
 
 if __name__ == '__main__':
