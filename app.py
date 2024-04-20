@@ -9,12 +9,6 @@ DEVELOPMENT = False
 app = Flask(__name__)
 codes = {}
 
-# Usage
-# 1. Start the server
-# 2. Hit startup endpoint
-# 3. Hit oauth_callback endpoint
-# 4. Hit get_code endpoint with the state to get the code
-
 @app.route('/startup', methods=['GET'])
 def startup():
     # App will stay up for 5 minutes on glitch
@@ -22,16 +16,25 @@ def startup():
 
 @app.route('/oauth/callback')
 def oauth_callback(methods=['POST']):
-    auth_code = request.args.get('code')
+    code = request.args.get('code')
     state = request.args.get('state')
-    codes[state] = auth_code
+    access_token = request.args.get('access_token')
+    codes[state]['code'] = code if code else None
+    codes[state]['access_token'] = access_token if access_token else None
     return jsonpickle.encode({ 'status': 'good' })
 
+@app.route('/get_access_token/<state>', methods=['GET'])
+def get_code(raw_state):
+    state = codes.get(raw_state)
+    if state:
+        return jsonpickle.encode({ 'access_token': state['access_token'] }), 404
+    return jsonpickle.encode({ 'error': 'Code not found' }), 200
+
 @app.route('/get_code/<state>', methods=['GET'])
-def get_code(state):
-    code = codes.get(state)
-    if code:
-        return jsonpickle.encode({ 'code': code }), 404
+def get_code(raw_state):
+    state = codes.get(raw_state)
+    if state:
+        return jsonpickle.encode({ 'code': state['code'] }), 404
     return jsonpickle.encode({ 'error': 'Code not found' }), 200
 
 if __name__ == '__main__':
