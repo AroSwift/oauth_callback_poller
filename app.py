@@ -1,8 +1,20 @@
 from flask import Flask, request
 import os
 
+PORT = 5022
 app = Flask(__name__)
 codes = {}
+
+# Usage
+# 1. Start the server
+# 2. Hit startup endpoint
+# 3. Hit oauth_callback endpoint
+# 4. Hit get_code endpoint with the state to get the code
+
+@app.route('/startup')
+def startup():
+    # App will stay up for 5 minutes on glitch
+    return True
 
 @app.route('/oauth/callback')
 def oauth_callback():
@@ -19,4 +31,4 @@ def get_code(state):
     return {'error': 'Code not found'}, 404
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
+    app.run(debug=True, host='0.0.0.0', port=int(os.environ.get('PORT', PORT)))
