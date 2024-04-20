@@ -16,11 +16,20 @@ def startup():
 
 @app.route('/oauth/callback')
 def oauth_callback(methods=['POST']):
-    code = request.args.get('code')
+
+    print('ARGs, ', request.args)
     state = request.args.get('state')
+    code = request.args.get('code')
     access_token = request.args.get('access_token')
-    data_holder[state]['code'] = code if code else None
-    data_holder[state]['access_token'] = access_token if access_token else None
+
+    if access_token:
+        data_holder[code] = {}
+        data_holder[code]['access_token'] = access_token
+
+    if state:
+        data_holder[state] = {}
+        data_holder[state]['code'] = code
+
     return jsonpickle.encode({ 'status': 'good' })
 
 @app.route('/get_code/<state>', methods=['GET'])
@@ -30,9 +39,9 @@ def get_code(state):
         return jsonpickle.encode({ 'code': data['code'] }), 404
     return jsonpickle.encode({ 'error': 'Code not found' }), 200
 
-@app.route('/get_access_token/<state>', methods=['GET'])
-def get_access_token(state):
-    data = data_holder.get(state)
+@app.route('/get_access_token/<code>', methods=['GET'])
+def get_access_token(code):
+    data = data_holder.get(code)
     if data:
         return jsonpickle.encode({ 'access_token': data['access_token'] }), 404
     return jsonpickle.encode({ 'error': 'Code not found' }), 200
